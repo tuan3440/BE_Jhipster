@@ -1,10 +1,14 @@
 package com.mycompany.myapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 
 @Entity
 @Table(name = "sys_role", schema = "voffice", catalog = "")
+@SuppressWarnings("common-java:DuplicatedBlocks")
 public class SysRole {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +55,10 @@ public class SysRole {
     @Basic
     @Column(name = "update_by")
     private String updateBy;
+
+    @ManyToMany(mappedBy = "roles")
+    @JsonIgnoreProperties(value = { "roles" }, allowSetters = true)
+    private Set<SysUser> users = new HashSet<>();
 
     public Long getId() {
         return id;

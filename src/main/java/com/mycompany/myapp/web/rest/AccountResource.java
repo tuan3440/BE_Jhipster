@@ -1,5 +1,6 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.SysUser;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
@@ -61,8 +62,8 @@ public class AccountResource {
         if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
-        User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
-        mailService.sendActivationEmail(user);
+        SysUser user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
+        //        mailService.sendActivationEmail(user);
     }
 
     /**
@@ -71,13 +72,13 @@ public class AccountResource {
      * @param key the activation key.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be activated.
      */
-    @GetMapping("/activate")
-    public void activateAccount(@RequestParam(value = "key") String key) {
-        Optional<User> user = userService.activateRegistration(key);
-        if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this activation key");
-        }
-    }
+    //    @GetMapping("/activate")
+    //    public void activateAccount(@RequestParam(value = "key") String key) {
+    //        Optional<User> user = userService.activateRegistration(key);
+    //        if (!user.isPresent()) {
+    //            throw new AccountResourceException("No user was found for this activation key");
+    //        }
+    //    }
 
     /**
      * {@code GET  /authenticate} : check if the user is authenticated, and return its login.
@@ -97,13 +98,13 @@ public class AccountResource {
      * @return the current user.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user couldn't be returned.
      */
-    @GetMapping("/account")
-    public AdminUserDTO getAccount() {
-        return userService
-            .getUserWithAuthorities()
-            .map(AdminUserDTO::new)
-            .orElseThrow(() -> new AccountResourceException("User could not be found"));
-    }
+    //    @GetMapping("/account")
+    //    public AdminUserDTO getAccount() {
+    //        return userService
+    //            .getUserWithAuthorities()
+    //            .map(AdminUserDTO::new)
+    //            .orElseThrow(() -> new AccountResourceException("User could not be found"));
+    //    }
 
     /**
      * {@code POST  /account} : update the current user information.
@@ -112,27 +113,27 @@ public class AccountResource {
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already used.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the user login wasn't found.
      */
-    @PostMapping("/account")
-    public void saveAccount(@Valid @RequestBody AdminUserDTO userDTO) {
-        String userLogin = SecurityUtils
-            .getCurrentUserLogin()
-            .orElseThrow(() -> new AccountResourceException("Current user login not found"));
-        Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
-        if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userLogin))) {
-            throw new EmailAlreadyUsedException();
-        }
-        Optional<User> user = userRepository.findOneByLogin(userLogin);
-        if (!user.isPresent()) {
-            throw new AccountResourceException("User could not be found");
-        }
-        userService.updateUser(
-            userDTO.getFirstName(),
-            userDTO.getLastName(),
-            userDTO.getEmail(),
-            userDTO.getLangKey(),
-            userDTO.getImageUrl()
-        );
-    }
+    //    @PostMapping("/account")
+    //    public void saveAccount(@Valid @RequestBody AdminUserDTO userDTO) {
+    //        String userLogin = SecurityUtils
+    //            .getCurrentUserLogin()
+    //            .orElseThrow(() -> new AccountResourceException("Current user login not found"));
+    //        Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
+    //        if (existingUser.isPresent() && (!existingUser.get().getLogin().equalsIgnoreCase(userLogin))) {
+    //            throw new EmailAlreadyUsedException();
+    //        }
+    //        Optional<User> user = userRepository.findOneByLogin(userLogin);
+    //        if (!user.isPresent()) {
+    //            throw new AccountResourceException("User could not be found");
+    //        }
+    //        userService.updateUser(
+    //            userDTO.getFirstName(),
+    //            userDTO.getLastName(),
+    //            userDTO.getEmail(),
+    //            userDTO.getLangKey(),
+    //            userDTO.getImageUrl()
+    //        );
+    //    }
 
     /**
      * {@code POST  /account/change-password} : changes the current user's password.
@@ -140,30 +141,30 @@ public class AccountResource {
      * @param passwordChangeDto current and new password.
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the new password is incorrect.
      */
-    @PostMapping(path = "/account/change-password")
-    public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
-        if (isPasswordLengthInvalid(passwordChangeDto.getNewPassword())) {
-            throw new InvalidPasswordException();
-        }
-        userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
-    }
+    //    @PostMapping(path = "/account/change-password")
+    //    public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
+    //        if (isPasswordLengthInvalid(passwordChangeDto.getNewPassword())) {
+    //            throw new InvalidPasswordException();
+    //        }
+    //        userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
+    //    }
 
     /**
      * {@code POST   /account/reset-password/init} : Send an email to reset the password of the user.
      *
      * @param mail the mail of the user.
      */
-    @PostMapping(path = "/account/reset-password/init")
-    public void requestPasswordReset(@RequestBody String mail) {
-        Optional<User> user = userService.requestPasswordReset(mail);
-        if (user.isPresent()) {
-            mailService.sendPasswordResetMail(user.get());
-        } else {
-            // Pretend the request has been successful to prevent checking which emails really exist
-            // but log that an invalid attempt has been made
-            log.warn("Password reset requested for non existing mail");
-        }
-    }
+    //    @PostMapping(path = "/account/reset-password/init")
+    //    public void requestPasswordReset(@RequestBody String mail) {
+    //        Optional<User> user = userService.requestPasswordReset(mail);
+    //        if (user.isPresent()) {
+    //            mailService.sendPasswordResetMail(user.get());
+    //        } else {
+    //            // Pretend the request has been successful to prevent checking which emails really exist
+    //            // but log that an invalid attempt has been made
+    //            log.warn("Password reset requested for non existing mail");
+    //        }
+    //    }
 
     /**
      * {@code POST   /account/reset-password/finish} : Finish to reset the password of the user.
@@ -172,17 +173,17 @@ public class AccountResource {
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException {@code 500 (Internal Server Error)} if the password could not be reset.
      */
-    @PostMapping(path = "/account/reset-password/finish")
-    public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
-        if (isPasswordLengthInvalid(keyAndPassword.getNewPassword())) {
-            throw new InvalidPasswordException();
-        }
-        Optional<User> user = userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
-
-        if (!user.isPresent()) {
-            throw new AccountResourceException("No user was found for this reset key");
-        }
-    }
+    //    @PostMapping(path = "/account/reset-password/finish")
+    //    public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
+    //        if (isPasswordLengthInvalid(keyAndPassword.getNewPassword())) {
+    //            throw new InvalidPasswordException();
+    //        }
+    //        Optional<User> user = userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
+    //
+    //        if (!user.isPresent()) {
+    //            throw new AccountResourceException("No user was found for this reset key");
+    //        }
+    //    }
 
     private static boolean isPasswordLengthInvalid(String password) {
         return (

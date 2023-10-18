@@ -17,6 +17,15 @@ public class LoginVM {
     private String password;
 
     private boolean rememberMe;
+    private String captcha;
+
+    public String getCaptcha() {
+        return captcha;
+    }
+
+    public void setCaptcha(String captcha) {
+        this.captcha = captcha;
+    }
 
     public String getUsername() {
         return username;

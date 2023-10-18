@@ -1,6 +1,7 @@
 package com.mycompany.myapp.service.mapper;
 
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.SysUser;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
@@ -28,11 +29,11 @@ public class UserMapper {
         return new UserDTO(user);
     }
 
-    public List<AdminUserDTO> usersToAdminUserDTOs(List<User> users) {
+    public List<AdminUserDTO> usersToAdminUserDTOs(List<SysUser> users) {
         return users.stream().filter(Objects::nonNull).map(this::userToAdminUserDTO).collect(Collectors.toList());
     }
 
-    public AdminUserDTO userToAdminUserDTO(User user) {
+    public AdminUserDTO userToAdminUserDTO(SysUser user) {
         return new AdminUserDTO(user);
     }
 

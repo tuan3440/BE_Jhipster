@@ -1,5 +1,6 @@
 package com.mycompany.myapp.repository;
 
+import com.mycompany.myapp.domain.SysUser;
 import com.mycompany.myapp.domain.User;
 import java.time.Instant;
 import java.util.List;
@@ -13,18 +14,23 @@ import org.springframework.stereotype.Repository;
  * Spring Data JPA repository for the {@link User} entity.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findOneByActivationKey(String activationKey);
-    List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
-    Optional<User> findOneByResetKey(String resetKey);
-    Optional<User> findOneByEmailIgnoreCase(String email);
-    Optional<User> findOneByLogin(String login);
+public interface UserRepository extends JpaRepository<SysUser, Long> {
+    //    Optional<User> findOneByActivationKey(String activationKey);
+    //    List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
+    //    Optional<User> findOneByResetKey(String resetKey);
+    Optional<SysUser> findOneByEmailIgnoreCase(String email);
+
+    //    Optional<User> findOneByLogin(String login);
+
+    //    @EntityGraph(attributePaths = "authorities")
+    //    Optional<SysUser> findOneWithAuthoritiesByUserName(String login);
+    @EntityGraph(attributePaths = { "roles" })
+    Optional<SysUser> findOneWithAuthoritiesByUserName(String login);
 
     @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesByLogin(String login);
+    Optional<SysUser> findOneWithAuthoritiesByEmailIgnoreCase(String email);
 
-    @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesByEmailIgnoreCase(String email);
+    Page<User> findAllByIdNotNullAndIsActiveIsTrue(Pageable pageable);
 
-    Page<User> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
+    Optional<SysUser> findOneByUserName(String userName);
 }

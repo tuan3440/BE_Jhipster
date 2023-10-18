@@ -2,6 +2,7 @@ package com.mycompany.myapp.service.dto;
 
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.SysUser;
 import com.mycompany.myapp.domain.User;
 import java.io.Serializable;
 import java.time.Instant;
@@ -18,7 +19,6 @@ public class AdminUserDTO implements Serializable {
 
     private Long id;
 
-    @NotBlank
     @Pattern(regexp = Constants.LOGIN_REGEX)
     @Size(min = 1, max = 50)
     private String login;
@@ -28,6 +28,8 @@ public class AdminUserDTO implements Serializable {
 
     @Size(max = 50)
     private String lastName;
+
+    private String fullName;
 
     @Email
     @Size(min = 5, max = 254)
@@ -55,20 +57,27 @@ public class AdminUserDTO implements Serializable {
         // Empty constructor needed for Jackson.
     }
 
-    public AdminUserDTO(User user) {
+    public AdminUserDTO(SysUser user) {
         this.id = user.getId();
-        this.login = user.getLogin();
-        this.firstName = user.getFirstName();
-        this.lastName = user.getLastName();
+        this.fullName = user.getFullName();
         this.email = user.getEmail();
-        this.activated = user.isActivated();
-        this.imageUrl = user.getImageUrl();
-        this.langKey = user.getLangKey();
-        this.createdBy = user.getCreatedBy();
-        this.createdDate = user.getCreatedDate();
-        this.lastModifiedBy = user.getLastModifiedBy();
-        this.lastModifiedDate = user.getLastModifiedDate();
-        this.authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet());
+        this.login = user.getUserName();
+        //        this.activated = user.isActivated();
+        //        this.imageUrl = user.getImageUrl();
+        //        this.langKey = user.getLangKey();
+        //        this.createdBy = user.getCreatedBy();
+        //        this.createdDate = user.getCreatedDate();
+        //        this.lastModifiedBy = user.getLastModifiedBy();
+        //        this.lastModifiedDate = user.getLastModifiedDate();
+        //        this.authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet());
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public Long getId() {

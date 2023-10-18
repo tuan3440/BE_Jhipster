@@ -1,6 +1,9 @@
 package com.mycompany.myapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 
 @Entity
@@ -21,8 +24,8 @@ public class SysUser {
     private String fullName;
 
     @Basic
-    @Column(name = "password_hash")
-    private String passwordHash;
+    @Column(name = "password")
+    private String password;
 
     @Basic
     @Column(name = "gender")
@@ -140,6 +143,30 @@ public class SysUser {
     @Column(name = "login_failure_count")
     private Integer loginFailureCount;
 
+    @Transient
+    private Set<Authority> authorities;
+
+    @ManyToMany
+    @JoinTable(name = "sys_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnoreProperties(value = { "app", "users" }, allowSetters = true)
+    private Set<SysRole> roles = new HashSet<>();
+
+    public Set<SysRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<SysRole> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
     public Long getId() {
         return id;
     }
@@ -164,12 +191,12 @@ public class SysUser {
         this.fullName = fullName;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getGender() {
@@ -414,7 +441,7 @@ public class SysUser {
         if (id != null ? !id.equals(sysUser.id) : sysUser.id != null) return false;
         if (userName != null ? !userName.equals(sysUser.userName) : sysUser.userName != null) return false;
         if (fullName != null ? !fullName.equals(sysUser.fullName) : sysUser.fullName != null) return false;
-        if (passwordHash != null ? !passwordHash.equals(sysUser.passwordHash) : sysUser.passwordHash != null) return false;
+        if (password != null ? !password.equals(sysUser.password) : sysUser.password != null) return false;
         if (gender != null ? !gender.equals(sysUser.gender) : sysUser.gender != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(sysUser.dateOfBirth) : sysUser.dateOfBirth != null) return false;
         if (birthPlace != null ? !birthPlace.equals(sysUser.birthPlace) : sysUser.birthPlace != null) return false;
@@ -459,7 +486,7 @@ public class SysUser {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (userName != null ? userName.hashCode() : 0);
         result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
-        result = 31 * result + (passwordHash != null ? passwordHash.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
         result = 31 * result + (gender != null ? gender.hashCode() : 0);
         result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
         result = 31 * result + (birthPlace != null ? birthPlace.hashCode() : 0);

@@ -1,6 +1,8 @@
 package com.mycompany.myapp.security.jwt;
 
+import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.management.SecurityMetersService;
+import com.mycompany.myapp.service.RedisSevice;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -38,8 +40,9 @@ public class TokenProvider {
     private final long tokenValidityInMillisecondsForRememberMe;
 
     private final SecurityMetersService securityMetersService;
+    private final RedisSevice redisService;
 
-    public TokenProvider(JHipsterProperties jHipsterProperties, SecurityMetersService securityMetersService) {
+    public TokenProvider(JHipsterProperties jHipsterProperties, SecurityMetersService securityMetersService, RedisSevice redisService) {
         byte[] keyBytes;
         String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret();
         if (!ObjectUtils.isEmpty(secret)) {
@@ -60,6 +63,7 @@ public class TokenProvider {
             1000 * jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSecondsForRememberMe();
 
         this.securityMetersService = securityMetersService;
+        this.redisService = redisService;
     }
 
     public String createToken(Authentication authentication, boolean rememberMe) {
@@ -68,9 +72,9 @@ public class TokenProvider {
         long now = (new Date()).getTime();
         Date validity;
         if (rememberMe) {
-            validity = new Date(now + this.tokenValidityInMillisecondsForRememberMe);
+            validity = new Date(now + 1000 * Constants.TIME_EXPIRE_TOKEN + 1000 * Constants.TIME_REMEMBER);
         } else {
-            validity = new Date(now + this.tokenValidityInMilliseconds);
+            validity = new Date(now + 1000 * Constants.TIME_EXPIRE_TOKEN);
         }
 
         return Jwts
@@ -99,7 +103,9 @@ public class TokenProvider {
     public boolean validateToken(String authToken) {
         try {
             jwtParser.parseClaimsJws(authToken);
-
+            if (!redisService.isExist(authToken)) {
+                return false;
+            }
             return true;
         } catch (ExpiredJwtException e) {
             this.securityMetersService.trackTokenExpired();

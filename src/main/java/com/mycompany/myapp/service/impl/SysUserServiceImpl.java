@@ -11,6 +11,7 @@ import com.mycompany.myapp.service.dto.ChangePwDTO;
 import com.mycompany.myapp.service.dto.SysUserDTO;
 import com.mycompany.myapp.service.mapper.SysUserMapper;
 import com.mycompany.myapp.service.model.RequestPasswordModel;
+import com.mycompany.myapp.utils.DataUtil;
 import com.mycompany.myapp.utils.StringUtil;
 import com.mycompany.myapp.utils.ValidateUtil;
 import com.mycompany.myapp.web.rest.errors.CustomException;
@@ -20,6 +21,11 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +80,7 @@ public class SysUserServiceImpl implements SysUserService {
         String key = "";
         String encryptRequestPasswordModel = CommonUtil.encrypt(new Gson().toJson(requestPasswordModel));
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(encryptRequestPasswordModel)) {
-            key = URLEncoder.encode(encryptRequestPasswordModel, StandardCharsets.UTF_8.name());
+            key = URLEncoder.encode(encryptRequestPasswordModel, StandardCharsets.UTF_8);
         }
         return key;
     }
@@ -108,6 +114,18 @@ public class SysUserServiceImpl implements SysUserService {
             );
         }
         completePasswordForget(sysUser, changePwdDTO.getNewPass());
+    }
+
+    @Override
+    public Page<SysUserDTO> doSearch(String keyword, Integer status, Pageable pageable) {
+        if (StringUtils.isNotEmpty(keyword) && StringUtils.isNotBlank(keyword)) {
+            keyword = DataUtil.makeLikeQuery(keyword);
+        } else {
+            keyword = null;
+        }
+        Page<SysUser> rs = sysUserRepository.doSearch(keyword, status, pageable);
+        List<SysUserDTO> rsDTO = sysUserMapper.toDto(rs.getContent());
+        return new PageImpl<>(rsDTO, pageable, rs.getTotalElements());
     }
 
     private void completePasswordForget(SysUser sysUser, String newPassword) {

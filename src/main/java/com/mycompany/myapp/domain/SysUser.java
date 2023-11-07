@@ -147,7 +147,11 @@ public class SysUser {
     private Set<Authority> authorities;
 
     @ManyToMany
-    @JoinTable(name = "sys_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(
+        name = "sys_user_role",
+        joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
+    )
     @JsonIgnoreProperties(value = { "app", "users" }, allowSetters = true)
     private Set<SysRole> roles = new HashSet<>();
 

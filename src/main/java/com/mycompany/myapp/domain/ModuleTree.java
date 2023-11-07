@@ -1,16 +1,14 @@
-package com.mycompany.myapp.service.dto;
+package com.mycompany.myapp.domain;
 
-import java.sql.Timestamp;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
 
-public class SysActionDTO {
+public class ModuleTree {
 
     private Long id;
     private String code;
     private String name;
-    private String description;
     private Integer status;
+    private List<ModuleTree> children;
 
     public Long getId() {
         return id;
@@ -36,19 +34,19 @@ public class SysActionDTO {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public Integer getStatus() {
         return status;
     }
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public List<ModuleTree> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ModuleTree> children) {
+        this.children = children;
     }
 }

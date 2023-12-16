@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ public class SysUserResource {
     }
 
     @PostMapping("/doSearch")
+    @PreAuthorize("hasPermission('MANAGE_USER', 'SEARCH')")
     public ResponseEntity<List<SysUserDTO>> doSearch(@RequestBody SysUserSearch sysUserSearch, Pageable pageable) {
         Page<SysUserDTO> page = sysUserService.doSearch(sysUserSearch.getKeyword(), sysUserSearch.getStatus(), pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);

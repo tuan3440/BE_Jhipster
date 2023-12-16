@@ -26,6 +26,7 @@ public class SysActionResource {
     }
 
     @PostMapping("/doSearch")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'SEARCH')")
     public ResponseEntity<List<SysActionDTO>> doSearch(@RequestBody SysActionSearch sysActionSearch, Pageable pageable) {
         Page<SysActionDTO> page = sysActionService.doSearch(sysActionSearch.getKeyword(), sysActionSearch.getStatus(), pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
@@ -33,6 +34,7 @@ public class SysActionResource {
     }
 
     @PostMapping("/insert")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'CREATE')")
     public ResponseEntity<SysActionDTO> create(@RequestBody SysActionDTO sysActionDTO) {
         if (sysActionDTO.getId() != null) {
             throw new CustomException(ResponseCode.CODE.EXISTED, ResponseCode.MSG.EXISTED, "action is exist");
@@ -42,6 +44,7 @@ public class SysActionResource {
     }
 
     @PostMapping("/update")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'UPDATE')")
     public ResponseEntity<SysActionDTO> update(@RequestBody SysActionDTO sysActionDTO) {
         if (sysActionDTO.getId() == null) {
             throw new CustomException(ResponseCode.CODE.EXISTED, ResponseCode.MSG.EXISTED, "action is exist");
@@ -51,6 +54,7 @@ public class SysActionResource {
     }
 
     @PostMapping("delete/{id}")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'DELETE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         sysActionService.delete(id);
         return ResponseEntity.noContent().build();

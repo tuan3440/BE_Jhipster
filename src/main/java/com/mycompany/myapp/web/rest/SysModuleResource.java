@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.PaginationUtil;
@@ -26,6 +27,7 @@ public class SysModuleResource {
     }
 
     @PostMapping("/doSearch")
+    @PreAuthorize("hasPermission('MANAGE_MODULE', 'SEARCH')")
     public ResponseEntity<List<SysModuleDTO>> doSearch(@RequestBody SysModuleSearch sysModuleSearch, Pageable pageable) {
         Page<SysModuleDTO> page = sysModuleService.doSearch(
             sysModuleSearch.getKeyword(),
@@ -38,6 +40,7 @@ public class SysModuleResource {
     }
 
     @PostMapping("/insert")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'CREATE')")
     public ResponseEntity<SysModuleDTO> create(@RequestBody SysModuleDTO sysModuleDTO, Pageable pageable) {
         if (sysModuleDTO.getId() != null) {
             throw new CustomException(ResponseCode.CODE.EXISTED, ResponseCode.MSG.EXISTED, "module is exist");
@@ -47,6 +50,7 @@ public class SysModuleResource {
     }
 
     @PostMapping("/update")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'UPDATE')")
     public ResponseEntity<SysModuleDTO> update(@RequestBody SysModuleDTO sysModuleDTO) {
         if (sysModuleDTO.getId() == null) {
             throw new CustomException(ResponseCode.CODE.NOT_EXISTED, ResponseCode.MSG.NOT_EXISTED, "module is not exist");
@@ -56,12 +60,14 @@ public class SysModuleResource {
     }
 
     @GetMapping("/viewDetail/{id}")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'SEARCH')")
     public ResponseEntity<SysModuleDTO> findById(@PathVariable Long id) {
         SysModuleDTO result = sysModuleService.findById(id);
         return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasPermission('MANAGE_ACTION', 'DELETE')")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         sysModuleService.deleteById(id);
         return ResponseEntity.noContent().build();

@@ -18,4 +18,6 @@ public interface SysModuleService {
     List<ModuleTree> getTree();
 
     SysModuleDTO findById(Long id);
+
+    List<SysModuleDTO> getMenuByUserId(Long userId);
 }

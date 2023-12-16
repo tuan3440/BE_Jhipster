@@ -68,6 +68,11 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public SysUserDTO findByUserName(String userName) {
+        return sysUserRepository.findByUserName(userName).map(sysUserMapper::toDto).orElse(null);
+    }
+
+    @Override
     public String createHashKey(SysUserDTO sysUserDTO) throws UnsupportedEncodingException {
         String refreshToken = RandomUtil.generateResetKey();
         sysUserDTO.setResetKey(refreshToken);

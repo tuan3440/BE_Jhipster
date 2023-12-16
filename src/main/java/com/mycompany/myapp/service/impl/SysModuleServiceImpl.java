@@ -92,6 +92,12 @@ public class SysModuleServiceImpl implements SysModuleService {
         return sysModuleMapper.toDto(sysModule.get());
     }
 
+    @Override
+    public List<SysModuleDTO> getMenuByUserId(Long userId) {
+        List<SysModule> data = sysModuleRepository.getMenuByUserId(userId);
+        return sysModuleMapper.toDto(data);
+    }
+
     public List<ModuleTree> getTreeList(List<ModuleTree> moduleTreeList, Long parentId) {
         List<SysModule> list = sysModuleRepository.getChildModule(parentId);
         for (SysModule sysModule : list) {

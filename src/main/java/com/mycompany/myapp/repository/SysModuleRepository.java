@@ -38,4 +38,12 @@ public interface SysModuleRepository extends JpaRepository<SysModule, Long> {
 
     @Query(value = "select sm " + " from SysModule  sm " + " where 1=1 " + " and sm.parentId = :parentId and sm.status = 1")
     List<SysModule> getChildModule(@Param("parentId") Long parentId);
+
+    @Query(
+        value = "select distinct sm " +
+        " from SysModule  sm " +
+        " where 1=1 " +
+        " and sm.code in (select srm.moduleCode from SysRoleModule srm where  srm.roleId in (select sur.roleId from SysUserRole sur where sur.userId = :userId))"
+    )
+    List<SysModule> getMenuByUserId(@Param("userId") Long userId);
 }

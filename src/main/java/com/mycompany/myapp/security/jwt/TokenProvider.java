@@ -2,6 +2,7 @@ package com.mycompany.myapp.security.jwt;
 
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.management.SecurityMetersService;
+import com.mycompany.myapp.security.CustomGrantedAuthority;
 import com.mycompany.myapp.service.RedisSevice;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -66,8 +67,13 @@ public class TokenProvider {
         this.redisService = redisService;
     }
 
-    public String createToken(Authentication authentication, boolean rememberMe) {
-        String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+    public String createToken(Authentication authentication, boolean rememberMe, Long userId) {
+        //        String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        String authorities =
+            ((List<CustomGrantedAuthority>) authentication.getAuthorities()).get(0)
+                .getPermissions()
+                .stream()
+                .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
         Date validity;
@@ -81,6 +87,7 @@ public class TokenProvider {
             .builder()
             .setSubject(authentication.getName())
             .claim(AUTHORITIES_KEY, authorities)
+            .claim("userId", userId)
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(validity)
             .compact();
@@ -88,16 +95,22 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        List<String> lstPermission = new ArrayList<>();
+        if (claims.containsKey(AUTHORITIES_KEY)) {
+            lstPermission = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(",")).collect(Collectors.toList());
+        }
+        CustomGrantedAuthority grantedAuthority = new CustomGrantedAuthority();
+        grantedAuthority.setPermissions(lstPermission);
+        grantedAuthority.setRole("ROLE_USER");
+        //        Collection<? extends GrantedAuthority> authorities = Arrays
+        //            .stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+        //            .filter(auth -> !auth.trim().isEmpty())
+        //            .map(SimpleGrantedAuthority::new)
+        //            .collect(Collectors.toList());
 
-        Collection<? extends GrantedAuthority> authorities = Arrays
-            .stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-            .filter(auth -> !auth.trim().isEmpty())
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
+        User principal = new User(claims.getSubject(), "", Arrays.asList(grantedAuthority));
 
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, Arrays.asList(grantedAuthority));
     }
 
     public boolean validateToken(String authToken) {

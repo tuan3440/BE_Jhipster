@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.constant.ResponseCode;
+import com.mycompany.myapp.security.CustomGrantedAuthority;
 import com.mycompany.myapp.security.jwt.JWTFilter;
 import com.mycompany.myapp.security.jwt.TokenProvider;
-import com.mycompany.myapp.service.NotifyService;
-import com.mycompany.myapp.service.OTPService;
-import com.mycompany.myapp.service.RedisSevice;
-import com.mycompany.myapp.service.SysUserService;
+import com.mycompany.myapp.service.*;
 import com.mycompany.myapp.service.captcha.CommonUtil;
 import com.mycompany.myapp.service.dto.ChangePwDTO;
+import com.mycompany.myapp.service.dto.SysRoleModuleDTO;
 import com.mycompany.myapp.service.dto.SysUserDTO;
 import com.mycompany.myapp.service.model.BaseRes;
+import com.mycompany.myapp.utils.DataUtil;
 import com.mycompany.myapp.web.rest.errors.CustomException;
 import com.mycompany.myapp.web.rest.vm.LoginVM;
 import io.jsonwebtoken.JwtParser;
@@ -26,10 +26,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -62,6 +62,7 @@ public class UserJWTController {
     private final Key key;
     private final OTPService otpService;
     private final NotifyService notifyService;
+    private final SysRoleModuleService sysRoleModuleService;
 
     public UserJWTController(
         TokenProvider tokenProvider,
@@ -70,10 +71,13 @@ public class UserJWTController {
         SysUserService sysUserService,
         JHipsterProperties jHipsterProperties,
         OTPService otpService,
-        NotifyService notifyService
+        NotifyService notifyService,
+        SysModuleActionService sysModuleActionService,
+        SysRoleModuleService sysRoleModuleService
     ) {
         this.otpService = otpService;
         this.notifyService = notifyService;
+        this.sysRoleModuleService = sysRoleModuleService;
         byte[] keyBytes;
         String secret = jHipsterProperties.getSecurity().getAuthentication().getJwt().getBase64Secret();
         if (!ObjectUtils.isEmpty(secret)) {
@@ -92,18 +96,35 @@ public class UserJWTController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) {
+        SysUserDTO sysUserDTO = sysUserService.findByUserName(loginVM.getUsername());
+        List<SysRoleModuleDTO> list = sysRoleModuleService.getRoleModuleByUserId(sysUserDTO.getId());
+        List<String> permissionList = list
+            .stream()
+            .map(m -> {
+                if (!DataUtil.isNullOrEmpty(m.getActionCode())) {
+                    return m.getModuleCode() + "_" + m.getActionCode();
+                } else {
+                    return m.getModuleCode() + "_*";
+                }
+            })
+            .collect(Collectors.toList());
+        CustomGrantedAuthority grantedAuthority = new CustomGrantedAuthority();
+        grantedAuthority.setRole("USER");
+        grantedAuthority.setPermissions(permissionList);
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             loginVM.getUsername(),
-            loginVM.getPassword()
+            loginVM.getPassword(),
+            Arrays.asList(grantedAuthority)
         );
 
         if (loginVM.getCaptcha() != null) {
             this.sysUserService.validateCaptcha(loginVM);
         }
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.createToken(authentication, loginVM.isRememberMe());
+        //        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        String jwt = tokenProvider.createToken(authenticationToken, loginVM.isRememberMe(), sysUserDTO.getId());
         if (loginVM.isRememberMe()) {
             redisService.setKeyValueWithTimeOut(
                 jwt,

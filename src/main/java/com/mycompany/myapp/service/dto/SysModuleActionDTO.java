@@ -1,17 +1,32 @@
 package com.mycompany.myapp.service.dto;
 
-import java.sql.Timestamp;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class SysModuleActionDTO {
 
     private Long id;
     private Long moduleId;
     private Long actionId;
-    private Timestamp updateTime;
-    private Integer isActive;
-    private String updateBy;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
+    public Long getActionId() {
+        return actionId;
+    }
+
+    public void setActionId(Long actionId) {
+        this.actionId = actionId;
+    }
 }

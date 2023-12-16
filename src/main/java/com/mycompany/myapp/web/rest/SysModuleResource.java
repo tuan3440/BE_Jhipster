@@ -72,4 +72,10 @@ public class SysModuleResource {
         List<ModuleTree> moduleTreeList = sysModuleService.getTree();
         return ResponseEntity.ok().body(moduleTreeList);
     }
+
+    @PostMapping("getMenu")
+    public ResponseEntity<List<SysModuleDTO>> getMenuByUserId(@RequestBody Long userId) {
+        List<SysModuleDTO> result = sysModuleService.getMenuByUserId(userId);
+        return ResponseEntity.ok().body(result);
+    }
 }

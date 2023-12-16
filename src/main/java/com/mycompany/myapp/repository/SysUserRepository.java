@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface SysUserRepository extends JpaRepository<SysUser, Long> {
     Optional<SysUser> findByEmail(String email);
 
+    Optional<SysUser> findByUserName(String userName);
+
     Optional<SysUser> findByIdAndResetKey(long userId, String resetKey);
 
     @Query(

@@ -2,6 +2,7 @@ package com.mycompany.myapp.service.dto;
 
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.SysRole;
 import com.mycompany.myapp.domain.SysUser;
 import com.mycompany.myapp.domain.User;
 import java.io.Serializable;
@@ -62,6 +63,7 @@ public class AdminUserDTO implements Serializable {
         this.fullName = user.getFullName();
         this.email = user.getEmail();
         this.login = user.getUserName();
+        this.authorities = user.getRoles().stream().map(SysRole::getCode).collect(Collectors.toSet());
         //        this.activated = user.isActivated();
         //        this.imageUrl = user.getImageUrl();
         //        this.langKey = user.getLangKey();
